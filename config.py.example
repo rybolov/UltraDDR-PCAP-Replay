@@ -1,0 +1,21 @@
+#!/bin/python3
+
+import json
+class Config:
+    """Configuration File"""
+
+    def __init__(self):
+        self.ProviderURL = "https://rcsv.ddr.ultradns.com/dns-query?name="
+        self.ClientID = 'CHANGEME'
+
+
+    def __repr__(self):
+        """Return string representation of everything."""
+        return json.dumps(self.__dict__, default=obj_dict, indent=4)
+
+def obj_dict(obj):  # Needed for the json.dumps() call in the __repr__ of the classes.
+    return obj.__dict__
+
+if __name__ == "__main__":
+    config = Config()
+    print(config)

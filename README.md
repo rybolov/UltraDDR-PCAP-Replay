@@ -1,6 +1,6 @@
 # ultraddr-pcap-replay
 
-A utility that reads a packet capture (PCAP) file, extracts queries, and replays them to Vercara UltraDDR using a customer account ID and gives some analysis.  It also seeds the domains/FQDNs into the Watch Engine so that they can be later qualified and blocked if they are new to UltraDDR.
+A utility that reads a packet capture (PCAP) file, extracts DNS query names, and replays them to Vercara UltraDDR using a customer account ID and gives some analysis.  It also seeds the domains/FQDNs into the Watch Engine so that they can be later qualified and blocked if they are new to UltraDDR.
 
 This tool replays the following query types:
 1. A
@@ -8,7 +8,7 @@ This tool replays the following query types:
 3. CNAME
 4. PTR
 5. TXT
-6. AAAA
+6. AAAA (gets converted to an A query)
 
 Example files with DNS queries are in the testdata directory.
 

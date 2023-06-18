@@ -12,6 +12,10 @@ This tool replays the following query types:
 
 Example files with DNS queries are in the testdata directory.
 
+Longer network samples are much better and don't add materially to the runtime because we remove duplicate queries.  You can take samples from your resolvers or from the network immediately upstream of them (ie, from a span/mirror port) in the following way:
+1. tcpdump -vvv 'udp dst port 53' -w dns.sample.pcap
+2. wireshark with a filter of 'udp dst port 53' and save as pcap or pcap-ng.
+
 
 We give the status of each IOC:
 1. Blocked: Blocked by DDR

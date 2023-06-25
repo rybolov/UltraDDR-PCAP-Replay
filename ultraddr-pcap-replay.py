@@ -70,6 +70,8 @@ parser.add_argument('--serial', action='store_true', help="Process in serial ins
 This helps in troubleshooting but is slower.", default=False)
 parser.add_argument('--testing', action='store_true', help="Only read the first 10 packets of the capture.",
                     default=False)
+parser.add_argument('--addpause', action='store_true', help="Spread out the queries by waiting 3 seconds between.",
+                    default=False)
 args = parser.parse_args()
 # ----------End Input Validation----------
 
@@ -111,25 +113,28 @@ class QueryList:
         #print('File Read.\nTotal packets: {}'.format(len(pcap)))
         for pkt in pcap:
             # Opcode 0 is a query, 1 is an answer.
-            if pkt.getlayer('DNS') and pkt.getlayer('DNS').opcode == 0 and pkt['DNS'].qd.qtype in querytypes.keys():
-                queryname = pkt['DNS'].qd.qname.decode('utf-8').rstrip('.')
-                print('Found query name: {}'.format(queryname))
-                if queryname not in self.queries.keys():
-                    print('Query name is unique, so adding it to our ')
-                    query = Query(queryname)
-                    #print(pkt['DNS'].qd.qtype.show())
-                    #pkt['DNS'].qd.show()
-                    if pkt['DNS'].qd.qtype != 28: # Convert AAAA to A to avoid misses.
-                        query.type = querytypes[pkt['DNS'].qd.qtype]
-                        print('Found query type: {}'.format(query.type))
+            try:
+                if pkt.getlayer('DNS') and pkt.getlayer('DNS').opcode == 0 and pkt['DNS'].qd.qtype in querytypes.keys():
+                    queryname = pkt['DNS'].qd.qname.decode('utf-8').rstrip('.')
+                    print('Found query name: {}'.format(queryname))
+                    if queryname not in self.queries.keys():
+                        print('Query name is unique, so adding it to our ')
+                        query = Query(queryname)
+                        #print(pkt['DNS'].qd.qtype.show())
+                        #pkt['DNS'].qd.show()
+                        if pkt['DNS'].qd.qtype != 28: # Convert AAAA to A to avoid misses.
+                            query.type = querytypes[pkt['DNS'].qd.qtype]
+                            print('Found query type: {}'.format(query.type))
+                        else:
+                            query.type = 'A'
+                            print('Found query type: AAAA but changing it to A')
+                        self.queries[queryname] = query
+                    #print(pkt['DNS'].qd.qname)
                     else:
-                        query.type = 'A'
-                        print('Found query type: AAAA but changing it to A')
-                    self.queries[queryname] = query
-                #print(pkt['DNS'].qd.qname)
-                else:
-                    print('We already have this in our list, so ignoring.')
-                print('')
+                        print('We already have this in our list, so ignoring.')
+                    print('')
+            except:
+                pass
 
     def makeCSV(self):
         for query in self.queries.values():
@@ -142,6 +147,8 @@ class QueryList:
         # Run twice with a 3-second pause.
         for ioc in self.queries.values():
             ioc.get_ddr()
+            if args.addpause:
+                time.sleep(3)
         time.sleep(3)
         # Second Run!
         for query in self.queries.values():
